@@ -1,11 +1,20 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
 import Messages from "./components/Messages";
 import Input from "./components/Input";
 
-function randomName() {
-  const adjectives = [
-    "autumn",
+type Message = {
+  member: {
+    username: string;
+    color: string;
+    id?: string;
+  };
+  text: string;
+};
+
+const randomName = (): string => {
+  const adjectives: string[] = [
+    // Adjectives array... "autumn",
     "hidden",
     "bitter",
     "misty",
@@ -70,7 +79,8 @@ function randomName() {
     "lively",
     "nameless",
   ];
-  const nouns = [
+  const nouns: string[] = [
+    // Nouns array...
     "waterfall",
     "river",
     "breeze",
@@ -136,66 +146,80 @@ function randomName() {
     "smoke",
     "star",
   ];
-  const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
-  const noun = nouns[Math.floor(Math.random() * nouns.length)];
+  const adjective: string =
+    adjectives[Math.floor(Math.random() * adjectives.length)];
+  const noun: string = nouns[Math.floor(Math.random() * nouns.length)];
   return adjective + noun;
-}
+};
 
-function randomColor() {
+const randomColor = (): string => {
   return "#" + Math.floor(Math.random() * 0xffffff).toString(16);
-}
+};
 
-class App extends Component {
-  state = {
-    messages: [],
-    member: {
-      username: randomName(),
-      color: randomColor(),
-    },
-  };
+const App: React.FC = () => {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [member, setMember] = useState<{
+    username: string;
+    color: string;
+    id?: string;
+  }>({
+    username: randomName(),
+    color: randomColor(),
+  });
+  const [drone, setDrone] = useState<any>(null);
 
-  constructor() {
-    super();
-    this.drone = new window.Scaledrone("gHMFr0wugwnulvic", {
-      data: this.state.member,
+  useEffect(() => {
+    let isSubscribed = true; // Flag to track if component is still mounted
+
+    const droneInstance = new window.Scaledrone("gHMFr0wugwnulvic", {
+      data: member,
     });
-    this.drone.on("open", (error) => {
+
+    droneInstance.on("open", (error: any) => {
       if (error) {
         return console.error(error);
       }
-      const member = { ...this.state.member };
-      member.id = this.drone.clientId;
-      this.setState({ member });
+      const updatedMember = { ...member };
+      updatedMember.id = droneInstance.clientId;
+      setMember(updatedMember);
     });
-    const room = this.drone.subscribe("observable-room");
-    room.on("data", (data, member) => {
-      const messages = this.state.messages;
-      messages.push({ member, text: data });
-      this.setState({ messages });
-    });
-  }
 
-  render() {
-    return (
-      <div className="App">
-        <div className="App-header">
-          <h1>My Chat App</h1>
-        </div>
-        <Messages
-          messages={this.state.messages}
-          currentMember={this.state.member}
-        />
-        <Input onSendMessage={this.onSendMessage} />
-      </div>
-    );
-  }
+    const room = droneInstance.subscribe("observable-room");
+    const onData = (data: string, member: any) => {
+      if (isSubscribed) {
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          { member, text: data },
+        ]);
+      }
+    };
+    room.on("data", onData);
 
-  onSendMessage = (message) => {
-    this.drone.publish({
+    setDrone(droneInstance);
+
+    return () => {
+      isSubscribed = false; // Component is unmounting, unsubscribe from event
+      room.off("data", onData);
+      droneInstance.close();
+    };
+  }, []); // Empty dependency array to run the effect only once
+
+  const onSendMessage = (message: string) => {
+    drone.publish({
       room: "observable-room",
       message,
     });
   };
-}
+
+  return (
+    <div className="App">
+      <div className="App-header">
+        <h1>My Chat App</h1>
+      </div>
+      <Messages messages={messages} currentMember={member} />
+      <Input onSendMessage={onSendMessage} />
+    </div>
+  );
+};
 
 export default App;

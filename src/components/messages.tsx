@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 
-interface MessageType {
+interface Message {
   member: {
     id: string;
     clientData: {
@@ -12,36 +12,49 @@ interface MessageType {
 }
 
 interface MessagesProps {
-  messages: MessageType[];
+  messages: Message[];
   currentMember: {
     id: string;
+    clientData: {
+      color: string;
+      username: string;
+    };
   };
 }
 
-const Messages: React.FC<MessagesProps> = ({ messages, currentMember }) => (
-  <ul className="Messages-list">
-    {messages.map((message) => renderMessage(message, currentMember))}
-  </ul>
-);
+const Messages: React.FC<MessagesProps> = ({ messages, currentMember }) => {
+  const [messageState, setMessageState] = useState<Message[]>(messages);
 
-const renderMessage = (message: MessageType, currentMember: { id: string }) => {
-  const { member, text } = message;
-  const messageFromMe = member.id === currentMember.id;
-  const className = messageFromMe
-    ? "Messages-message currentMember"
-    : "Messages-message";
+  // Update the state when `messages` prop changes
+  React.useEffect(() => {
+    setMessageState(messages);
+  }, [messages]);
+
+  const renderMessage = (message: Message) => {
+    const { member, text } = message;
+    const messageFromMe = member.id === currentMember.id;
+    const className = messageFromMe
+      ? "Messages-message currentMember"
+      : "Messages-message";
+
+    return (
+      <li className={className} key={member.id}>
+        <span
+          className="avatar"
+          style={{ backgroundColor: member.clientData.color }}
+        />
+        <div className="Message-content">
+          <div className="username">{member.clientData.username}</div>
+          <div className="text">{text}</div>
+        </div>
+      </li>
+    );
+  };
 
   return (
-    <li className={className}>
-      <span
-        className="avatar"
-        style={{ backgroundColor: member.clientData.color }}
-      />
-      <div className="Message-content">
-        <div className="username">{member.clientData.username}</div>
-        <div className="text">{text}</div>
-      </div>
-    </li>
+    <ul className="Messages-list">
+      {messageState.map((message) => renderMessage(message))}
+    </ul>
   );
 };
 

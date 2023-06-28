@@ -1,36 +1,38 @@
-import React, { Component } from "react";
+import React, { ChangeEvent, FormEvent, useState } from "react";
 
-class Input extends Component {
-  state = {
-    text: "",
+type InputProps = {
+  onSendMessage: (message: string) => void;
+};
+
+const Input: React.FC<InputProps> = ({ onSendMessage }) => {
+  const [text, setText] = useState("");
+
+  const onChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setText(e.target.value);
   };
 
-  onChange = (e) => {
-    this.setState({ text: e.target.value });
-  };
-
-  onSubmit = (e) => {
+  const onSubmit = (e: FormEvent) => {
     e.preventDefault();
-    this.setState({ text: "" });
-    this.props.onSendMessage(this.state.text);
+    if (text.trim() !== "") {
+      onSendMessage(text);
+      setText("");
+    }
   };
 
-  render() {
-    return (
-      <div className="Input">
-        <form onSubmit={this.onSubmit}>
-          <input
-            onChange={this.onChange}
-            value={this.state.text}
-            type="text"
-            placeholder="Enter your message and press ENTER"
-            autoFocus={true}
-          />
-          <button>Send</button>
-        </form>
-      </div>
-    );
-  }
-}
+  return (
+    <div className="Input">
+      <form onSubmit={onSubmit}>
+        <input
+          onChange={onChange}
+          value={text}
+          type="text"
+          placeholder="Enter your message and press ENTER"
+          autoFocus={true}
+        />
+        <button type="submit">Send</button>
+      </form>
+    </div>
+  );
+};
 
 export default Input;
