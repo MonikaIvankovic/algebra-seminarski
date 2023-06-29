@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "./App.css";
+import "./App.scss";
 import Messages from "./components/Messages";
 import Input from "./components/Input";
 
@@ -14,7 +14,7 @@ type Message = {
 
 const randomName = (): string => {
   const adjectives: string[] = [
-    // Adjectives array... "autumn",
+    "autumn",
     "hidden",
     "bitter",
     "misty",
@@ -80,7 +80,6 @@ const randomName = (): string => {
     "nameless",
   ];
   const nouns: string[] = [
-    // Nouns array...
     "waterfall",
     "river",
     "breeze",
@@ -169,7 +168,7 @@ const App: React.FC = () => {
   const [drone, setDrone] = useState<any>(null);
 
   useEffect(() => {
-    let isSubscribed = true; // Flag to track if component is still mounted
+    let isSubscribed = true;
 
     const droneInstance = new window.Scaledrone("gHMFr0wugwnulvic", {
       data: member,
@@ -198,11 +197,11 @@ const App: React.FC = () => {
     setDrone(droneInstance);
 
     return () => {
-      isSubscribed = false; // Component is unmounting, unsubscribe from event
+      isSubscribed = false;
       room.off("data", onData);
       droneInstance.close();
     };
-  }, []); // Empty dependency array to run the effect only once
+  }, []);
 
   const onSendMessage = (message: string) => {
     drone.publish({
@@ -213,7 +212,7 @@ const App: React.FC = () => {
 
   return (
     <div className="App">
-      <div className="App-header">
+      <div className="App__header">
         <h1>My Chat App</h1>
       </div>
       <Messages messages={messages} currentMember={member} />

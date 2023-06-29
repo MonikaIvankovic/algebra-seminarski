@@ -1,16 +1,23 @@
+* {
+  box-sizing: border-box;
+}
+
 .App {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  align-items: center;
+  width: 1000px;
+  justify-content: center;
   height: 100vh;
-}
-
-.App-header {
-  background-color: #262626;
-  overflow: visible;
-  width: 100%;
-  text-align: center;
-  color: white;
+  &__header {
+    display: flex;
+    background-color: #262626;
+    overflow: visible;
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+    color: white;
+  }
 }
 
 .Messages-list {
@@ -30,7 +37,6 @@
 }
 
 .Messages-message.currentMember {
-  /*justify-content: flex-end;*/
   flex-direction: row-reverse;
   text-align: right;
 }
@@ -86,6 +92,8 @@ input {
   border-radius: 8px;
   border: 1px solid orangered;
   flex-grow: 1;
+  width: 500px;
+  text-align: center;
 }
 
 button {

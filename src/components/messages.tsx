@@ -25,7 +25,6 @@ interface MessagesProps {
 const Messages: React.FC<MessagesProps> = ({ messages, currentMember }) => {
   const [messageState, setMessageState] = useState<Message[]>(messages);
 
-  // Update the state when `messages` prop changes
   React.useEffect(() => {
     setMessageState(messages);
   }, [messages]);
